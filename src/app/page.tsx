@@ -1,101 +1,131 @@
-import Image from "next/image";
+'use client'
+import React, { useState, FormEvent } from 'react';
+import { PlusCircle, XCircle } from 'lucide-react';
 
-export default function Home() {
+interface FormData {
+  start: string;
+  waypoints: string[];
+  end: string;
+}
+
+const Home = () => {
+  const [waypoints, setWaypoints] = useState(['']);
+  
+  const handleAddWaypoint = (): void => {
+    if (waypoints.length < 4) {
+      setWaypoints([...waypoints, '']);
+    }
+  };
+
+  const handleRemoveWaypoint = (index: number): void => {
+    const newWaypoints = waypoints.filter((_, i) => i !== index);
+    setWaypoints(newWaypoints);
+  };
+
+  const handleWaypointChange = (index: number, value: string): void => {
+    const newWaypoints = [...waypoints];
+    newWaypoints[index] = value;
+    setWaypoints(newWaypoints);
+  };
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
+    e.preventDefault();
+    const formData = {
+      출발지: (e.currentTarget.elements.namedItem('start') as HTMLInputElement).value,
+      경유지: waypoints.filter(wp => wp.trim() !== ''),
+      도착지: (e.currentTarget.elements.namedItem('end') as HTMLInputElement).value
+    };
+    console.log('제출된 데이터:', formData);
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="max-w-md mx-auto p-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+            출발지
+          </label>
+          <input
+            name="start"
+            type="text"
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm 
+                     focus:outline-none focus:ring-2 focus:ring-blue-500
+                     dark:bg-gray-800 dark:border-gray-600 dark:text-white
+                     dark:focus:ring-blue-400"
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+              경유지
+            </label>
+            {waypoints.length < 4 && (
+              <button
+                type="button"
+                onClick={handleAddWaypoint}
+                className="text-blue-600 hover:text-blue-700 flex items-center text-sm
+                         dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                <PlusCircle className="w-4 h-4 mr-1" />
+                경유지 추가
+              </button>
+            )}
+          </div>
+          
+          {waypoints.map((waypoint, index) => (
+            <div key={index} className="flex gap-2">
+              <input
+                type="text"
+                value={waypoint}
+                onChange={(e) => handleWaypointChange(index, e.target.value)}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm 
+                         focus:outline-none focus:ring-2 focus:ring-blue-500
+                         dark:bg-gray-800 dark:border-gray-600 dark:text-white
+                         dark:focus:ring-blue-400"
+                placeholder={`경유지 ${index + 1}`}
+              />
+              <button
+                type="button"
+                onClick={() => handleRemoveWaypoint(index)}
+                className="text-red-600 hover:text-red-700
+                         dark:text-red-400 dark:hover:text-red-300"
+              >
+                <XCircle className="w-6 h-6" />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+            도착지
+          </label>
+          <input
+            name="end"
+            type="text"
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm 
+                     focus:outline-none focus:ring-2 focus:ring-blue-500
+                     dark:bg-gray-800 dark:border-gray-600 dark:text-white
+                     dark:focus:ring-blue-400"
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md 
+                   hover:bg-blue-700 focus:outline-none focus:ring-2 
+                   focus:ring-blue-500 focus:ring-offset-2
+                   dark:bg-blue-500 dark:hover:bg-blue-600
+                   dark:focus:ring-blue-400 dark:focus:ring-offset-gray-800"
         >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          경로 저장
+        </button>
+      </form>
     </div>
   );
-}
+};
+
+export default Home;
